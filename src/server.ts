@@ -8,6 +8,9 @@ import { auth } from "./config/auth.js";
 import { connectDB } from "./config/db.js";
 import { verifyToken } from "./middleware/verifyToken.js";
 import { authorizeRoles } from "./middleware/authorizeRoles.js";
+import menuRoutes from "./routes/menu.routes.js";
+import orderRoutes from "./modules/orders/order.routes.js";
+import { ensureOrderIndexes } from "./modules/orders/order.service.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -25,6 +28,12 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 
 // JSON Body Parser
 app.use(express.json());
+
+// Menu API Routes
+app.use("/api/menu", menuRoutes);
+
+// Order API Routes
+app.use("/api/orders", orderRoutes);
 
 // JWT Verification Test
 app.get("/api/protected", verifyToken, (req, res) => {
@@ -86,6 +95,8 @@ app.get("/", (_req, res) => {
 const startServer = async () => {
   try {
     await connectDB();
+    await ensureOrderIndexes();
+    console.log("Order indexes initialized successfully.");
 
     app.listen(PORT, () => {
       console.log(`PizzaHub server running on port ${PORT}`);
@@ -97,3 +108,6 @@ const startServer = async () => {
 };
 
 void startServer();
+
+
+
