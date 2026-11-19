@@ -1,4 +1,4 @@
-﻿
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -9,6 +9,7 @@ import { connectDB } from "./config/db.js";
 import { verifyToken } from "./middleware/verifyToken.js";
 import { authorizeRoles } from "./middleware/authorizeRoles.js";
 import menuRoutes from "./routes/menu.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 import orderRoutes from "./modules/orders/order.routes.js";
 import { ensureOrderIndexes } from "./modules/orders/order.service.js";
 import subscriptionRoutes from "./modules/subscriptions/subscription.routes.js";
@@ -44,6 +45,7 @@ app.use("/api/menu", menuRoutes);
 
 // Order API Routes
 app.use("/api/orders", orderRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 
 // JWT Verification Test
@@ -121,6 +123,7 @@ const startServer = async () => {
 };
 
 void startServer();
+
 
 
 
