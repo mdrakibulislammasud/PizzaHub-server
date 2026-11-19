@@ -9,8 +9,13 @@ import {
 } from "../modules/admin/admin.controller.js";
 
 import { getAdminDashboardOverviewController } from "../modules/admin/admin-dashboard.controller.js";
-
 import { getAdminTransactionsController } from "../modules/admin/admin-transactions.controller.js";
+
+import {
+  getAllMenuItemsForAdminController,
+  updateMenuItemStatusController,
+  deleteMenuItemByAdminController,
+} from "../modules/menu/menu.controller.js";
 
 const router = Router();
 
@@ -20,17 +25,16 @@ router.use(verifyToken, authorizeRoles("admin"));
 // Admin dashboard overview.
 router.get("/overview", getAdminDashboardOverviewController);
 
-// Get users with search, role filter and pagination.
+// User management.
 router.get("/users", getAdminUsersController);
+router.patch("/users/:id/block", updateUserBlockStatusController);
 
-// Block or unblock a user.
-router.patch(
-  "/users/:id/block",
-  updateUserBlockStatusController,
-);
-
-// View transactions with search, status filter and pagination.
-// Read-only: no payment modification endpoints.
+// Transaction management (read-only).
 router.get("/transactions", getAdminTransactionsController);
+
+// Menu item management.
+router.get("/menu-items", getAllMenuItemsForAdminController);
+router.patch("/menu-items/:id/status", updateMenuItemStatusController);
+router.delete("/menu-items/:id", deleteMenuItemByAdminController);
 
 export default router;

@@ -1,4 +1,4 @@
-﻿import { ObjectId, UUID } from "mongodb";
+import { ObjectId, UUID } from "mongodb";
 
 import { client } from "../../config/db.js";
 import { env } from "../../config/env.js";
@@ -252,13 +252,86 @@ export const deleteVendorMenuItem = async (
 // ==========================================
 
 
-export const getAllMenuItemsForAdmin = async (): Promise<MenuItem[]> => {
-  const items = await menuCollection()
-    .find({})
-    .sort({ createdAt: -1 })
-    .toArray();
+export interface AdminMenuItemsOptions {
+  search?: string;
+  status?: MenuItem["status"];
+  category?: MenuCategory;
+  location?: string;
+  sort?: "newest" | "oldest" | "price-asc" | "price-desc";
+  page?: number;
+  limit?: number;
+}
 
-  return items.map(formatMenuItem);
+export interface AdminMenuItemsResult {
+  items: MenuItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export const getAllMenuItemsForAdmin = async (
+  options: AdminMenuItemsOptions = {},
+): Promise<AdminMenuItemsResult> => {
+  const {
+    search,
+    status,
+    category,
+    location,
+    sort = "newest",
+    page = 1,
+    limit = 12,
+  } = options;
+
+  const filter: {
+    status?: MenuItem["status"];
+    category?: MenuCategory;
+    location?: RegExp;
+    $or?: { itemName?: RegExp; description?: RegExp }[];
+  } = {};
+
+  if (status) filter.status = status;
+  if (category) filter.category = category;
+
+  if (location) {
+    filter.location = new RegExp(escapeRegex(location), "i");
+  }
+
+  if (search) {
+    const searchRegex = new RegExp(escapeRegex(search), "i");
+
+    filter.$or = [
+      { itemName: searchRegex },
+      { description: searchRegex },
+    ];
+  }
+
+  const sortOptions: Record<string, 1 | -1> =
+    sort === "newest"
+      ? { createdAt: -1 }
+      : sort === "oldest"
+        ? { createdAt: 1 }
+        : sort === "price-asc"
+          ? { price: 1 }
+          : { price: -1 };
+
+  const [total, items] = await Promise.all([
+    menuCollection().countDocuments(filter),
+    menuCollection()
+      .find(filter)
+      .sort(sortOptions)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray(),
+  ]);
+
+  return {
+    items: items.map(formatMenuItem),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 };
 
 export class MenuApprovalLimitError extends Error {

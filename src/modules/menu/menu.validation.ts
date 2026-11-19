@@ -64,3 +64,32 @@ export const updateMenuItemStatusSchema = z.object({
 });
 
 export type UpdateMenuItemStatusInput = z.infer<typeof updateMenuItemStatusSchema>; 
+
+// Admin menu listing query validation.
+export const adminMenuQuerySchema = z.object({
+  search: z.string().trim().max(100).optional(),
+
+  status: z.enum([
+    "pending",
+    "approved",
+    "rejected",
+    "inactive",
+  ]).optional(),
+
+  category: z.enum(menuCategories).optional(),
+
+  location: z.string().trim().max(150).optional(),
+
+  sort: z.enum([
+    "newest",
+    "oldest",
+    "price-asc",
+    "price-desc",
+  ]).default("newest"),
+
+  page: z.coerce.number().int().min(1).default(1),
+
+  limit: z.coerce.number().int().min(1).max(50).default(12),
+});
+
+export type AdminMenuQuery = z.infer<typeof adminMenuQuerySchema>;

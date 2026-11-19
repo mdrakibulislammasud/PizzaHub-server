@@ -1,9 +1,10 @@
-﻿import type { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import {
   createMenuItemFieldsSchema,
   updateMenuItemSchema,
   updateMenuItemStatusSchema,
+  adminMenuQuerySchema,
   menuCategories,
 } from "./menu.validation.js";
 
@@ -361,12 +362,29 @@ export const getAllMenuItemsForAdminController = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const items = await getAllMenuItemsForAdmin();
+      const validation = adminMenuQuerySchema.safeParse(req.query);
+
+    if (!validation.success) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid menu query parameters.",
+        errors: validation.error.issues,
+      });
+      return;
+    }
+
+    const result = await getAllMenuItemsForAdmin(validation.data);
 
     res.status(200).json({
       success: true,
       message: "All menu items retrieved successfully.",
-      data: items,
+      data: result.items,
+      pagination: {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
+      },
     });
   } catch (error) {
     console.error("Get all menu items error:", error);
