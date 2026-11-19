@@ -1,4 +1,4 @@
-
+﻿
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -11,6 +11,9 @@ import { authorizeRoles } from "./middleware/authorizeRoles.js";
 import menuRoutes from "./routes/menu.routes.js";
 import orderRoutes from "./modules/orders/order.routes.js";
 import { ensureOrderIndexes } from "./modules/orders/order.service.js";
+import subscriptionRoutes from "./modules/subscriptions/subscription.routes.js";
+import { stripeWebhookController } from "./modules/subscriptions/subscription.webhook.controller.js";
+import { ensureSubscriptionIndexes } from "./modules/subscriptions/subscription.service.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -26,6 +29,13 @@ app.use(
 // Better Auth Routes
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
+// Stripe Webhook - must receive the original raw request body
+app.post(
+  "/api/subscriptions/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhookController
+);
+
 // JSON Body Parser
 app.use(express.json());
 
@@ -34,6 +44,7 @@ app.use("/api/menu", menuRoutes);
 
 // Order API Routes
 app.use("/api/orders", orderRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 // JWT Verification Test
 app.get("/api/protected", verifyToken, (req, res) => {
@@ -97,6 +108,8 @@ const startServer = async () => {
     await connectDB();
     await ensureOrderIndexes();
     console.log("Order indexes initialized successfully.");
+    await ensureSubscriptionIndexes();
+    console.log("Subscription indexes initialized successfully.");
 
     app.listen(PORT, () => {
       console.log(`PizzaHub server running on port ${PORT}`);
@@ -108,6 +121,8 @@ const startServer = async () => {
 };
 
 void startServer();
+
+
 
 
 

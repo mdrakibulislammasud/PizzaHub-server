@@ -17,6 +17,7 @@ import {
   getAllMenuItemsForAdmin,
   updateMenuItemStatus,
   deleteMenuItemByAdmin,
+  MenuApprovalLimitError,
 } from "./menu.service.js";
 
 import { uploadImageToImgBB } from "../../utils/imgbb.js";
@@ -413,6 +414,14 @@ export const updateMenuItemStatusController = async (
       data: updatedItem,
     });
   } catch (error) {
+    if (error instanceof MenuApprovalLimitError) {
+      res.status(409).json({
+        success: false,
+        message: error.message,
+      });
+      return;
+    }
+
     console.error("Update menu item status error:", error);
 
     res.status(500).json({
@@ -453,3 +462,4 @@ export const deleteMenuItemByAdminController = async (
     });
   }
 };
+
