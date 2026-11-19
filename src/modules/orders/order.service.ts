@@ -559,3 +559,35 @@ export const cancelCustomerOrder = async (
   return cancelledOrder ? formatOrder(cancelledOrder) : null;
 };
 
+
+// --------------------------------------------------
+// CUSTOMER DASHBOARD OVERVIEW
+// --------------------------------------------------
+
+export interface CustomerDashboardOverview {
+  totalOrders: number;
+  pendingOrders: number;
+  acceptedOrders: number;
+  rejectedOrders: number;
+}
+
+export const getCustomerDashboardOverview = async (
+  customerId: string,
+): Promise<CustomerDashboardOverview> => {
+  const filter = { customerId };
+
+  const [totalOrders, pendingOrders, acceptedOrders, rejectedOrders] =
+    await Promise.all([
+      orderCollection().countDocuments(filter),
+      orderCollection().countDocuments({ ...filter, status: "pending" }),
+      orderCollection().countDocuments({ ...filter, status: "accepted" }),
+      orderCollection().countDocuments({ ...filter, status: "rejected" }),
+    ]);
+
+  return {
+    totalOrders,
+    pendingOrders,
+    acceptedOrders,
+    rejectedOrders,
+  };
+};

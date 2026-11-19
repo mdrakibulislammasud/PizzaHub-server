@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { verifyToken } from "../../middleware/verifyToken.js";
 import { authorizeRoles } from "../../middleware/authorizeRoles.js";
+import { getCustomerDashboardOverviewController } from "./customer-dashboard.controller.js";
 
 import {
   createOrderController,
@@ -23,6 +24,14 @@ router.post(
   verifyToken,
   authorizeRoles("customer"),
   createOrderController,
+);
+
+// Get customer dashboard overview
+router.get(
+  "/customer/overview",
+  verifyToken,
+  authorizeRoles("customer"),
+  getCustomerDashboardOverviewController,
 );
 
 // Get customer's own orders
@@ -62,3 +71,8 @@ router.patch(
 );
 
 export default router;
+
+
+
+
+
