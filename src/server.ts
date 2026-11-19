@@ -9,6 +9,7 @@ import { connectDB } from "./config/db.js";
 import { verifyToken } from "./middleware/verifyToken.js";
 import { authorizeRoles } from "./middleware/authorizeRoles.js";
 import menuRoutes from "./routes/menu.routes.js";
+import profileRoutes from "./routes/profile.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import vendorRoutes from "./routes/vendor.routes.js";
 import orderRoutes from "./modules/orders/order.routes.js";
@@ -43,6 +44,7 @@ app.use(express.json());
 
 // Menu API Routes
 app.use("/api/menu", menuRoutes);
+app.use("/api/profile", profileRoutes);
 
 // Order API Routes
 app.use("/api/orders", orderRoutes);
@@ -125,6 +127,7 @@ const startServer = async () => {
 };
 
 void startServer();
+
 
 
 
