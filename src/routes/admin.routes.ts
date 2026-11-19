@@ -10,6 +10,8 @@ import {
 
 import { getAdminDashboardOverviewController } from "../modules/admin/admin-dashboard.controller.js";
 
+import { getAdminTransactionsController } from "../modules/admin/admin-transactions.controller.js";
+
 const router = Router();
 
 // All routes require an authenticated Admin.
@@ -26,5 +28,9 @@ router.patch(
   "/users/:id/block",
   updateUserBlockStatusController,
 );
+
+// View transactions with search, status filter and pagination.
+// Read-only: no payment modification endpoints.
+router.get("/transactions", getAdminTransactionsController);
 
 export default router;
